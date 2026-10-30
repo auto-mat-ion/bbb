@@ -453,7 +453,7 @@ def create_cs_process(num_c, security_code):
                 # return False
             else:
                 log(f"Card {i + 1} created successfully.")
-            time.sleep(2)
+            time.sleep(10)
             wait_for_relogin()
         return True
     except Exception as e:
