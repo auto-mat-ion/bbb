@@ -50,9 +50,13 @@ LEFT_BUTTON_SWIPER_ELEMENT = (By.CSS_SELECTOR, 'i[class*="swiper-arrow-left "]')
 H1_TAG_ELEMENT = (By.TAG_NAME, "h1")
 
 
+# CHOLDER_NAME_ELEMENT = (
+#     By.CSS_SELECTOR,
+#     'a[class*="hover:bg-gray-200 dark:hover:bg-gray-700 "]',
+# )
 CHOLDER_NAME_ELEMENT = (
     By.CSS_SELECTOR,
-    'a[class*="hover:bg-gray-200 dark:hover:bg-gray-700 "]',
+    'button[aria-haspopup="menu"]',
 )
 
 
@@ -93,6 +97,7 @@ def is_cardholder_name_displayed():
         )
         return True
     except Exception as e:
+        log(f"Error checking cardholder name: {e}")
         return False
 
 
