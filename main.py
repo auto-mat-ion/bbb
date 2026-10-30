@@ -69,6 +69,16 @@ _ELEMENT = (By.CSS_SELECTOR, "ELLLLLL")
 _ELEMENT = (By.CSS_SELECTOR, "ELLLLLL")
 
 
+def click_c_sidebar_btn():
+    try:
+        sidebar_btn = wait.until(EC.visibility_of_element_located(SIDEMAR_CARDS_BTN))
+        sidebar_btn.click()
+        return True
+    except Exception as e:
+        log(f"Error clicking sidebar cards button: {e}")
+        return False
+
+
 def log(message, log_file=logfile_dir):
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}")
 
@@ -258,6 +268,7 @@ def add_a_c(
     security_code,
 ):
     try:
+        click_c_sidebar_btn()
         if not click_add_c_button(driver):
             log("Failed to click add card button.")
             return False
@@ -413,8 +424,11 @@ def create_cs_process(num_c, security_code):
         return False
 
 
-NUMBER_CARDS = int(input("Enter the number of cards to create: "))
-SECURITY_CODE = input("Enter the security code: ")
+# NUMBER_CARDS = int(input("Enter the number of cards to create: "))
+# SECURITY_CODE = input("Enter the security code: ")
+
+NUMBER_CARDS = 100
+SECURITY_CODE = "040860"
 
 driver = Driver(
     uc=True,
