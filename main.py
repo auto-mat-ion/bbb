@@ -399,7 +399,7 @@ def wait_for_relogin():
             # log("Waiting for user to log in...")
             time.sleep(1)
         log("User logged in successfully.")
-        time.sleep(30)
+        time.sleep(100)
         return True
     except Exception as e:
         log(f"Error waiting for relogin: {e}")
