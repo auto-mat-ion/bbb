@@ -37,7 +37,7 @@ SIDEMAR_CARDS_BTN = (
 
 CARD_DETAILS_MAIN_DIV_ELEMENT = (By.CSS_SELECTOR, 'div[class*="divide-y"]')
 SECURITY_CODE_INPUT_ELEMENT = (By.CSS_SELECTOR, 'input[name="code"]')
-SHOW_C_DERAILS_ELEMENT = (By.CSS_SELECTOR, 'button[class*="inline-block"')
+SHOW_C_DERAILS_ELEMENT = (By.CSS_SELECTOR, 'button[class*="inline-block"]')
 ADD_C_PINK_BTN_ELEMENT = (By.CSS_SELECTOR, 'div[class*=" outline-pink"][role="button"]')
 DEBIT_CARD_PARENT_ELEMENT = (By.CSS_SELECTOR, 'div[class*="space-x-1"]')
 ADD_D_C_BUTTON_ELEMENT = (By.CSS_SELECTOR, 'button[class*="inline-block "]')
@@ -212,11 +212,11 @@ def click_add_c_button(driver):
 
 def click_show_c_details():
     try:
-        c_details_main_element = wait.until(
-            EC.visibility_of_element_located(CARD_DETAILS_MAIN_DIV_ELEMENT)
+        show_c_details_btn = wait.until(
+            EC.visibility_of_element_located(SHOW_C_DERAILS_ELEMENT)
         )
-        btn_parent_element = c_details_main_element.find_elements(By.XPATH, "./*")[2]
-        show_c_details_btn = btn_parent_element.find_element(SHOW_C_DERAILS_ELEMENT)
+        # btn_parent_element = c_details_main_element.find_elements(By.XPATH, "./*")[2]
+        # show_c_details_btn = btn_parent_element.find_element(SHOW_C_DERAILS_ELEMENT)
         show_c_details_btn.click()
         return True
     except Exception as e:
@@ -249,7 +249,7 @@ def read_c_details():
             True,
             {
                 "card_index": all_text[0],
-                "card_number": all_text[2].split("\n")[1],
+                "card_number": all_text[2].split("\n")[1].replace(" ", ""),
                 "card_expiry": all_text[4].split("\n")[1],
                 "card_cvv": all_text[5].split("\n")[1],
             },
@@ -259,10 +259,10 @@ def read_c_details():
         c_data = (
             False,
             {
-                "card_index": None,
-                "card_number": None,
-                "card_expiry": None,
-                "card_cvv": None,
+                "card_index": "None",
+                "card_number": "None",
+                "card_expiry": "None",
+                "card_cvv": "None",
             },
         )
 
@@ -326,22 +326,34 @@ def add_a_c(driver, security_code, c_name):
             log("Failed to click create button.")
             return False
 
-        time.sleep(10)
+        time.sleep(7)
+        retries = 0
+        while retries < 5:
+            if not click_show_c_details():
+                log("Failed to click show card details button.")
 
-        if not click_show_c_details():
-            log("Failed to click show card details button.")
+            time.sleep(1)
+
+            if not enter_security_code(security_code):
+                log("Failed to enter security code.")
+
+            time.sleep(3)
+
+            status, c_details = read_c_details()
+            if not status or len(c_details["card_number"]) < 10:
+                log("Failed to read card details. Retrying...")
+                retries += 1
+                time.sleep(3)
+            else:
+                break
+
+        # time.sleep(5)
+
+        if retries >= 4:
+            log("Failed to read card details after multiple attempts.")
             return False
-
-        time.sleep(1)
-
-        if not enter_security_code(security_code):
-            log("Failed to enter security code.")
-            return False
-
-        time.sleep(1)
-
-        status, c_details = read_c_details()
-        log(f"Card details: {c_details}")
+        else:
+            log(f"Card details read successfully: {c_details}")
 
         if status:
             save_cards_to_file(c_details)
@@ -453,8 +465,9 @@ def create_cs_process(num_c, security_code):
                 # return False
             else:
                 log(f"Card {i + 1} created successfully.")
-            time.sleep(10)
+            time.sleep(2)
             wait_for_relogin()
+            print("=" * 50)
         return True
     except Exception as e:
         log(f"Error creating cards: {e}")
