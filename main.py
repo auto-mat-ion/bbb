@@ -351,9 +351,7 @@ def add_a_c(driver, security_code, c_name):
             else:
                 break
 
-        # time.sleep(5)
-
-        if retries >= 4:
+        if retries >= 5:
             log("Failed to read card details after multiple attempts.")
             return False
         else:
