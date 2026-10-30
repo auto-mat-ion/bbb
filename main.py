@@ -329,21 +329,25 @@ def add_a_c(driver, security_code, c_name):
         time.sleep(7)
         retries = 0
         while retries < 5:
-            if not click_show_c_details():
+            if click_show_c_details():
+                log("Clicked show card details button.")
+            else:
                 log("Failed to click show card details button.")
 
             time.sleep(1)
 
-            if not enter_security_code(security_code):
+            if enter_security_code(security_code):
+                log("Entered security code successfully.")
+            else:
                 log("Failed to enter security code.")
 
-            time.sleep(3)
+            time.sleep(5)
 
             status, c_details = read_c_details()
             if not status or len(c_details["card_number"]) < 10:
                 log("Failed to read card details. Retrying...")
                 retries += 1
-                time.sleep(3)
+                time.sleep(2)
             else:
                 break
 
