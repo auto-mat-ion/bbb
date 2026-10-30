@@ -73,6 +73,19 @@ _ELEMENT = (By.CSS_SELECTOR, "ELLLLLL")
 _ELEMENT = (By.CSS_SELECTOR, "ELLLLLL")
 
 
+def enter_card_name(name):
+    try:
+        name_input = wait.until(
+            EC.visibility_of_element_located(PREFERRED_NAME_INPUT_ELEMENT)
+        )
+        name_input.clear()
+        name_input.send_keys(name)
+        return True
+    except Exception as e:
+        log(f"Error entering card name: {e}")
+        return False
+
+
 def click_c_sidebar_btn():
     try:
         sidebar_btn = wait.until(EC.visibility_of_element_located(SIDEMAR_CARDS_BTN))
@@ -268,33 +281,52 @@ def save_cards_to_file(card_data, filename=cards_csv):
         log(f"Error saving card details to file: {e}")
 
 
-def add_a_c(
-    driver,
-    security_code,
-):
+def add_a_c(driver, security_code, c_name):
     try:
-        click_c_sidebar_btn()
-        if not click_add_c_button(driver):
+        if click_c_sidebar_btn():
+            log("Clicked sidebar cards button.")
+        else:
+            log("Failed to click sidebar cards button.")
+            # return False
+        if click_add_c_button(driver):
+            log("Clicked add card button.")
+        else:
             log("Failed to click add card button.")
             return False
 
         time.sleep(1)
 
         ### CARD STEPS
-        if not click_debit_card():
+        if click_debit_card():
+            log("Clicked debit card button.")
+        else:
             log("Failed to click debit card button.")
             return False
 
         for _ in range(3):
             click_left_swiper_button()
-
             time.sleep(1)
 
-        if not click_add_digital_card():
+        log("Swiped left to find the card.")
+        if click_add_digital_card():
+            log("Clicked add digital card button.")
+        else:
             log("Failed to click add digital card button.")
             return False
 
-        time.sleep(3)
+        if enter_card_name(c_name):
+            log(f"Entered card name: {c_name}")
+        else:
+            log("Failed to enter card name.")
+            return False
+
+        if click_add_digital_card():
+            log("Clicked create button.")
+        else:
+            log("Failed to click create button.")
+            return False
+
+        time.sleep(10)
 
         if not click_show_c_details():
             log("Failed to click show card details button.")
@@ -416,9 +448,9 @@ def create_cs_process(num_c, security_code):
         wait_for_relogin()
         for i in range(num_c):
             log(f"Creating card {i + 1} of {num_c}...")
-            if not add_a_c(driver, security_code):
+            if not add_a_c(driver, security_code, i + 10):
                 log("Failed to add a card.")
-                return False
+                # return False
             else:
                 log(f"Card {i + 1} created successfully.")
             time.sleep(2)
