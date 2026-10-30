@@ -439,7 +439,7 @@ driver = Driver(
     uc=True,
     proxy=proxy,
     binary_location=chrome_location,
-    profile_dir=user_data_dir,
+    user_data_dir=user_data_dir,
     locale_code="en",
 )
 
