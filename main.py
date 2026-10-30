@@ -143,7 +143,7 @@ def is_login_page():
         return False
     except Exception as e:
         log(f"Error checking login page: {e}")
-        return True
+        return False
 
 
 def click_right_swiper_button():
