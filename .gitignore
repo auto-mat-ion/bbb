@@ -1,3 +1,4 @@
 utils/cprofile
 utils/log.txt
 downloaded_files
+__pycache__
