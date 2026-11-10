@@ -58,26 +58,18 @@ NICE_BTN_ELEMENT = (By.CSS_SELECTOR, 'button[class*="inline-block "]')
 RIGHT_BUTTON_SWIPER_ELEMENT = (By.CSS_SELECTOR, 'i[class*="swiper-arrow-right "]')
 LEFT_BUTTON_SWIPER_ELEMENT = (By.CSS_SELECTOR, 'i[class*="swiper-arrow-left "]')
 H1_TAG_ELEMENT = (By.TAG_NAME, "h1")
-
-
-# CHOLDER_NAME_ELEMENT = (
-#     By.CSS_SELECTOR,
-#     'a[class*="hover:bg-gray-200 dark:hover:bg-gray-700 "]',
-# )
 CHOLDER_NAME_ELEMENT = (
     By.CSS_SELECTOR,
     'button[aria-haspopup="menu"]',
 )
-
-
 FIRST_CODE_ELEMENT = (By.CSS_SELECTOR, 'div[data-test-id="codeContainer"]>div>div')
 CLOSE_SHOW_PPUP_ELEMENT = (By.CSS_SELECTOR, 'div[aria-label="Close popup"]')
-_ELEMENT = (By.CSS_SELECTOR, "ELLLLLL")
-_ELEMENT = (By.CSS_SELECTOR, "ELLLLLL")
-_ELEMENT = (By.CSS_SELECTOR, "ELLLLLL")
-_ELEMENT = (By.CSS_SELECTOR, "ELLLLLL")
-_ELEMENT = (By.CSS_SELECTOR, "ELLLLLL")
-_ELEMENT = (By.CSS_SELECTOR, "ELLLLLL")
+HOME_S_BTN_ELEMENT = (By.CSS_SELECTOR, 'a[data-test-id="sidebarAllYourAccount__home"]')
+AUTH_MICROSOFT_CARD_ELEMENT = (By.CSS_SELECTOR, 'a[class*="inline-block "]')
+AUTH_BTN_GREEN_ELEMENT = (By.CSS_SELECTOR, 'button[class*="border-green"]')
+CONFIRM_PYMT_BTN_ELEMENT = (By.CSS_SELECTOR, 'button[class*="bg-blue"]')
+USER_NAME_MENU_ELEMENTS_ELEMENT = (By.CSS_SELECTOR, 'div[role="menuitem"]')
+CHOLDER_ACTUAL_NAME_ELEMENT_ELEMENT = (By.CSS_SELECTOR, 'div[class*="leading-tight"]')
 _ELEMENT = (By.CSS_SELECTOR, "ELLLLLL")
 _ELEMENT = (By.CSS_SELECTOR, "ELLLLLL")
 _ELEMENT = (By.CSS_SELECTOR, "ELLLLLL")
@@ -103,6 +95,16 @@ def click_c_sidebar_btn():
         return True
     except Exception as e:
         log(f"Error clicking sidebar cards button: {e}")
+        return False
+
+
+def click_home_sidebar_btn():
+    try:
+        sidebar_btn = wait.until(EC.visibility_of_element_located(HOME_S_BTN_ELEMENT))
+        sidebar_btn.click()
+        return True
+    except Exception as e:
+        log(f"Error clicking sidebar home button")
         return False
 
 
@@ -138,7 +140,7 @@ def is_cardholder_name_displayed():
 def get_cardholder_name():
     try:
         cholder_name = wait.until(
-            EC.visibility_of_element_located(CHOLDER_NAME_ELEMENT)
+            EC.visibility_of_element_located(CHOLDER_ACTUAL_NAME_ELEMENT_ELEMENT)
         )
         return cholder_name.text
     except Exception as e:
@@ -178,6 +180,92 @@ def is_login_page():
         return False
     except Exception as e:
         # log(f"Error checking login page: {e}")
+        return False
+
+
+def click_menu_element():
+    try:
+        cholder_name = wait.until(
+            EC.visibility_of_element_located(CHOLDER_NAME_ELEMENT)
+        )
+        cholder_name.click()
+        time.sleep(1)
+        return True
+    except Exception as e:
+        log(f"Error checking cardholder name: {e}")
+        return False
+
+
+def click_next_user():
+    try:
+        current_user = get_cardholder_name()
+        log(f"Current user: {current_user}")
+        if click_menu_element():
+            log("Clicked cardholder name menu.")
+        else:
+            log("Failed to click cardholder name menu.")
+            return False
+        time.sleep(3)
+        menu_elements = wait.until(
+            EC.visibility_of_all_elements_located(USER_NAME_MENU_ELEMENTS_ELEMENT)
+        )
+        current_user_element = [
+            a for a in menu_elements if current_user.lower() in a.text.lower()
+        ][0]
+        # click next element or first element if current user is last
+        current_index = menu_elements.index(current_user_element)
+        next_index = (current_index + 1) % len(menu_elements)
+        next_user_element = menu_elements[next_index]
+        time.sleep(1)
+        next_user_element.click()
+        time.sleep(1)
+        return True
+    except Exception as e:
+        log(f"Error clicking next user: {e}")
+        return False
+
+
+def authorize():
+    if not click_next_user():
+        wait_for_relogin()
+    auth_user()
+
+
+def auth_user():
+    try:
+        stage = "no auth card"
+        a_elements = wait.until(
+            EC.visibility_of_all_elements_located(AUTH_MICROSOFT_CARD_ELEMENT)
+        )
+        auth_element = [
+            a for a in a_elements if "authorize your online payment" in a.text.lower()
+        ][0]
+        log(f"Found auth element. Clicking it...")
+        auth_element.click()
+        time.sleep(5)
+        stage = "Accept button"
+        accept_btn = wait.until(
+            EC.visibility_of_element_located(AUTH_BTN_GREEN_ELEMENT)
+        )
+        log(f"Found accept button. Clicking it...")
+        accept_btn.click()
+        time.sleep(5)
+        stage = "Confirm payment button"
+        confirm_btn = wait.until(
+            EC.visibility_of_element_located(CONFIRM_PYMT_BTN_ELEMENT)
+        )
+        log(f"Found confirm payment button. Clicking it...")
+        confirm_btn.click()
+        time.sleep(5)
+        enter_security_code(SECURITY_CODE)
+        time.sleep(10)
+        return True
+    except Exception as e:
+        try:
+            log(f"Authorising user not done: {stage}")
+            close_show_ppup()
+        except:
+            log(f"Authorising user not done: {e}")
         return False
 
 
@@ -246,7 +334,7 @@ def click_show_c_details():
         show_c_details_btn.click()
         return True
     except Exception as e:
-        log(f"Error clicking show card details button: {e}")
+        log(f"Error clicking show card details button.")
         return False
 
 
@@ -258,7 +346,7 @@ def enter_security_code(code):
         security_code_input.send_keys(code)
         return True
     except Exception as e:
-        log(f"Error entering security code: {e}")
+        log(f"Error entering security code.")
         return False
 
 
@@ -455,8 +543,8 @@ def wait_for_relogin():
             print("Login page not displayed. User still logged in")
             return True
         while is_login_page() or not is_cardholder_name_displayed():
-            # log("Waiting for user to log in...")
             time.sleep(1)
+        send_telegram_messages("User logged in successfully.")
         log("User logged in successfully.")
         time.sleep(100)
         return True
@@ -468,11 +556,15 @@ def wait_for_relogin():
 def create_cs_process(num_c, security_code, starting_c_num):
     try:
         wait_for_relogin()
+        try:
+            driver.refresh()
+            time.sleep(10)
+        except Exception as e:
+            log(f"Error refreshing the page: {e}")
         for i in range(num_c):
             log(f"Creating card {i + 1} of {num_c}...")
             if not add_a_c(driver, security_code, i + starting_c_num):
                 log("Failed to add a card.")
-
             else:
                 log(f"Card {i + 1} created successfully.")
             time.sleep(2)
@@ -484,30 +576,44 @@ def create_cs_process(num_c, security_code, starting_c_num):
         return False
 
 
+def unhandled_auth_process(driver):
+    refresher = 0
+    wait_for_relogin()
+    while True:
+        try:
+            authorize()
+            log("--" * 10)
+            time.sleep(5)
+            if refresher % 15 == 0:
+                driver.refresh()
+                time.sleep(30)
+                wait_for_relogin()
+            refresher += 1
+        except Exception as e:
+            log(f"Error in unhandled authorization process: {e}")
+            driver.refresh()
+
+
 def load_settings(settings_path: str | Path | None = None) -> tuple[int, str, str]:
     path = (
         Path(settings_path)
         if settings_path is not None
-        else Path(__file__).with_name("settings.json")
+        else Path(THE_BASE_DIR + "/settings.json").with_name("settings.json")
     )
     with path.open(encoding="utf-8") as settings_file:
         settings = json.load(settings_file)
-
     if not isinstance(settings, dict):
         raise ValueError("settings.json must contain a JSON object")
-
     number_cards = settings.get("NUMBER_CARDS")
     security_code = settings.get("SECURITY_CODE")
     proxy = settings.get("PROXY")
     f_c_n = settings.get("FIRST_CARD_NAME")
-
     if type(number_cards) is not int or number_cards <= 0:
         raise ValueError("NUMBER_CARDS must be a positive integer")
     if not isinstance(security_code, str) or not security_code:
         raise ValueError("SECURITY_CODE must be a non-empty string")
     if not isinstance(proxy, str) or not proxy:
         raise ValueError("proxy must be a non-empty string")
-
     return number_cards, security_code, proxy, f_c_n
 
 
@@ -526,4 +632,13 @@ time.sleep(3)
 driver.get("https://web.bunq.com/")
 
 wait = WebDriverWait(driver, 10)
-create_cs_process(NUMBER_CARDS, SECURITY_CODE, FIRST_CARD_NAME)
+
+action = input(
+    "Select action:\n1. Create cards\n2. Handle unhandled authorization\nEnter 1 or 2: "
+)
+if action == "1":
+    create_cs_process(NUMBER_CARDS, SECURITY_CODE, FIRST_CARD_NAME)
+elif action == "2":
+    unhandled_auth_process(driver)
+else:
+    log("Invalid action selected.")
