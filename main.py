@@ -305,6 +305,11 @@ def save_cards_to_file(card_data, filename=cards_csv):
 
 def add_a_c(driver, security_code, c_name):
     try:
+        try:
+            driver.refresh()
+            time.sleep(11)
+        except Exception as e:
+            log(f"Error refreshing the page: {e}")
         if click_c_sidebar_btn():
             log("Clicked sidebar cards button.")
         else:
@@ -354,7 +359,7 @@ def add_a_c(driver, security_code, c_name):
                 log("Entered security code successfully.")
             else:
                 log("Failed to enter security code.")
-            time.sleep(5)
+            time.sleep(11)
             status, c_details = read_c_details()
             if not status or len(c_details["card_number"]) < 10:
                 log("Failed to read card details. Retrying...")
@@ -467,7 +472,7 @@ def create_cs_process(num_c, security_code, starting_c_num):
             log(f"Creating card {i + 1} of {num_c}...")
             if not add_a_c(driver, security_code, i + starting_c_num):
                 log("Failed to add a card.")
-                # return False
+
             else:
                 log(f"Card {i + 1} created successfully.")
             time.sleep(2)
