@@ -393,16 +393,10 @@ def save_cards_to_file(card_data, filename=cards_csv):
 
 def add_a_c(driver, security_code, c_name):
     try:
-        try:
-            driver.refresh()
-            time.sleep(11)
-        except Exception as e:
-            log(f"Error refreshing the page: {e}")
         if click_c_sidebar_btn():
             log("Clicked sidebar cards button.")
         else:
             log("Failed to click sidebar cards button.")
-            # return False
         if click_add_c_button(driver):
             log("Clicked add card button.")
         else:
@@ -562,6 +556,14 @@ def create_cs_process(num_c, security_code, starting_c_num):
         except Exception as e:
             log(f"Error refreshing the page: {e}")
         for i in range(num_c):
+            if i % 3 == 0 and i != 0:
+                log("Refreshing the page to avoid memory error.")
+                try:
+                    driver.refresh()
+                    time.sleep(30)
+                except Exception as e:
+                    log(f"Error refreshing the page: {e}")
+
             log(f"Creating card {i + 1} of {num_c}...")
             if not add_a_c(driver, security_code, i + starting_c_num):
                 log("Failed to add a card.")
