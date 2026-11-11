@@ -70,9 +70,12 @@ AUTH_BTN_GREEN_ELEMENT = (By.CSS_SELECTOR, 'button[class*="border-green"]')
 CONFIRM_PYMT_BTN_ELEMENT = (By.CSS_SELECTOR, 'button[class*="bg-blue"]')
 USER_NAME_MENU_ELEMENTS_ELEMENT = (By.CSS_SELECTOR, 'div[role="menuitem"]')
 CHOLDER_ACTUAL_NAME_ELEMENT_ELEMENT = (By.CSS_SELECTOR, 'div[class*="leading-tight"]')
-_ELEMENT = (By.CSS_SELECTOR, "ELLLLLL")
-_ELEMENT = (By.CSS_SELECTOR, "ELLLLLL")
-_ELEMENT = (By.CSS_SELECTOR, "ELLLLLL")
+DONE_LABEL_ELEMENT = (By.CSS_SELECTOR, 'div[class="text-3xl font-semibold"]')
+DONE_PAGE_BACK_BTN_ELEMENT = (
+    By.CSS_SELECTOR,
+    'div[role="button"][class*="inline-block"]',
+)
+# _ELEMENT = (By.CSS_SELECTOR, "ELLLLLL")
 
 
 def enter_card_name(name):
@@ -134,6 +137,30 @@ def is_cardholder_name_displayed():
         return True
     except Exception as e:
         log(f"Error checking cardholder name: {e}")
+        return False
+
+
+def done_label_displayed():
+    try:
+        done_label = wait_long.until(
+            EC.visibility_of_element_located(DONE_LABEL_ELEMENT)
+        )
+
+        return done_label.text.lower() == "done"
+    except Exception as e:
+        log(f"Error checking cardholder name: {e}")
+        return False
+
+
+def click_back_btn():
+    try:
+        back_btn = wait.until(
+            EC.visibility_of_element_located(DONE_PAGE_BACK_BTN_ELEMENT)
+        )
+        back_btn.click()
+        return True
+    except Exception as e:
+        log(f"Error clicking back button: {e}")
         return False
 
 
@@ -228,7 +255,13 @@ def click_next_user():
 def authorize():
     if not click_next_user():
         wait_for_relogin()
-    auth_user()
+    time.sleep(5)
+    retry = 0
+    status = True
+    while status and retry < 3:
+        status = auth_user()
+        time.sleep(3)
+        retry += 1
 
 
 def auth_user():
@@ -259,6 +292,8 @@ def auth_user():
         time.sleep(5)
         enter_security_code(SECURITY_CODE)
         time.sleep(10)
+        done_label_displayed()
+        click_back_btn()
         return True
     except Exception as e:
         try:
@@ -634,6 +669,7 @@ time.sleep(3)
 driver.get("https://web.bunq.com/")
 
 wait = WebDriverWait(driver, 10)
+wait_long = WebDriverWait(driver, 30)
 
 action = input(
     "Select action:\n1. Create cards\n2. Handle unhandled authorization\nEnter 1 or 2: "
