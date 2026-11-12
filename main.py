@@ -124,9 +124,12 @@ def close_show_ppup():
 
 
 def log(message, log_file=logfile_dir):
-    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}")
-    with open(log_file or "log.txt", "a") as f:
-        f.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}\n")
+    try:
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}")
+        with open(log_file or "log.txt", "a", encoding="utf-8") as f:
+            f.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}\n")
+    except:
+        pass
 
 
 def is_cardholder_name_displayed():
@@ -145,7 +148,6 @@ def done_label_displayed():
         done_label = wait_long.until(
             EC.visibility_of_element_located(DONE_LABEL_ELEMENT)
         )
-
         return done_label.text.lower() == "done"
     except Exception as e:
         log(f"Error checking cardholder name: {e}")
@@ -260,6 +262,8 @@ def authorize():
     status = True
     while status and retry < 3:
         status = auth_user()
+        if status:
+            retry = 0
         time.sleep(3)
         retry += 1
 
