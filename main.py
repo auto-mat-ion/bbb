@@ -304,7 +304,7 @@ def auth_user():
     except Exception as e:
         try:
             log(f"Authorising user not done: {stage}")
-            close_show_ppup()
+            # close_show_ppup()
         except:
             log(f"Authorising user not done: {e}")
         return False
@@ -604,7 +604,6 @@ def create_cs_process(num_c, security_code, starting_c_num):
                     time.sleep(30)
                 except Exception as e:
                     log(f"Error refreshing the page: {e}")
-
             log(f"Creating card {i + 1} of {num_c}...")
             if not add_a_c(driver, security_code, i + starting_c_num):
                 log("Failed to add a card.")
@@ -680,6 +679,8 @@ wait_long = WebDriverWait(driver, 30)
 action = input(
     "Select action:\n1. Create cards\n2. Handle unhandled authorization\nEnter 1 or 2: "
 )
+
+
 if action == "1":
     create_cs_process(NUMBER_CARDS, SECURITY_CODE, FIRST_CARD_NAME)
 elif action == "2":
