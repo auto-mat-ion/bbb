@@ -218,7 +218,7 @@ def click_menu_element():
             EC.visibility_of_element_located(CHOLDER_NAME_ELEMENT)
         )
         cholder_name.click()
-        time.sleep(1)
+        time.sleep(0.3)
         return True
     except Exception as e:
         log(f"Error checking cardholder name: {e}")
@@ -234,7 +234,7 @@ def click_next_user():
         else:
             log("Failed to click cardholder name menu.")
             return False
-        time.sleep(3)
+        time.sleep(0.3)
         menu_elements = wait.until(
             EC.visibility_of_all_elements_located(USER_NAME_MENU_ELEMENTS_ELEMENT)
         )
@@ -245,9 +245,9 @@ def click_next_user():
         current_index = menu_elements.index(current_user_element)
         next_index = (current_index + 1) % len(menu_elements)
         next_user_element = menu_elements[next_index]
-        time.sleep(1)
+        time.sleep(0.3)
         next_user_element.click()
-        time.sleep(1)
+        time.sleep(0.3)
         return True
     except Exception as e:
         log(f"Error clicking next user: {e}")
@@ -257,47 +257,49 @@ def click_next_user():
 def authorize():
     if not click_next_user():
         wait_for_relogin()
-    time.sleep(5)
+    time.sleep(2)
     retry = 0
     status = True
     while status and retry < 3:
         status = auth_user()
         if status:
             retry = 0
-        time.sleep(3)
+        time.sleep(0.5)
         retry += 1
 
 
 def auth_user():
     try:
-        stage = "no auth card"
+        stage = "No auth prompt waiting."
         a_elements = wait.until(
             EC.visibility_of_all_elements_located(AUTH_MICROSOFT_CARD_ELEMENT)
         )
         auth_element = [
             a for a in a_elements if "authorize your online payment" in a.text.lower()
         ][0]
-        log(f"Found auth element. Clicking it...")
+        log(f"Found payment waiting for authentication. Starting auth")
         auth_element.click()
-        time.sleep(5)
+        time.sleep(1)
         stage = "Accept button"
         accept_btn = wait.until(
             EC.visibility_of_element_located(AUTH_BTN_GREEN_ELEMENT)
         )
-        log(f"Found accept button. Clicking it...")
+        log("Clicking accept button")
         accept_btn.click()
-        time.sleep(5)
+        time.sleep(1)
         stage = "Confirm payment button"
         confirm_btn = wait.until(
             EC.visibility_of_element_located(CONFIRM_PYMT_BTN_ELEMENT)
         )
-        log(f"Found confirm payment button. Clicking it...")
+        log(f"Clicking confirm payment button.")
         confirm_btn.click()
-        time.sleep(5)
+        time.sleep(1)
         enter_security_code(SECURITY_CODE)
-        time.sleep(10)
+        time.sleep(5)
         done_label_displayed()
+        time.sleep(0.5)
         click_back_btn()
+        print("==" * 10)
         return True
     except Exception as e:
         try:
@@ -624,7 +626,7 @@ def unhandled_auth_process(driver):
         try:
             authorize()
             log("--" * 10)
-            time.sleep(5)
+            time.sleep(3)
             if refresher % 15 == 0:
                 driver.refresh()
                 time.sleep(30)
